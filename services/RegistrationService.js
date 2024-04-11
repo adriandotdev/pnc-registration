@@ -42,9 +42,13 @@ module.exports = class RegistrationService {
 
 		if (STATUS !== "SUCCESS") throw new HttpBadRequest(STATUS, []);
 
+		const message = `Hello ${
+			data.first_name + " " + data.last_name
+		},\n\nYour OTP for ParkNcharge is ${otp}.\n\nUse it to authenticate. If you didn't request this, ignore it.\n\nThanks,\nParkNcharge`;
+
 		const sms = new SMS({
 			contact_number: data.contact_number,
-			message: `Your OTP is ${otp}`,
+			message,
 		});
 
 		await sms.SendOTP();
@@ -67,10 +71,13 @@ module.exports = class RegistrationService {
 		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
 
 		const mobile_number = Crypto.Decrypt(result[0][0].mobile_number);
+		const name = Crypto.Decrypt(result[0][0].name);
+
+		const message = `Hi, ${name}\nYour temporary password is: ${password}.\n\nUse it to log in securely. If you didn't request this, please ignore.\n\nThanks,\nParkNcharge`;
 
 		const sms = new SMS({
 			contact_number: mobile_number,
-			message: `Your temporary password is ${password}`,
+			message,
 		});
 
 		await sms.SendOTP();
