@@ -29,4 +29,22 @@ module.exports = class RegistrationRepository {
 			);
 		});
 	}
+
+	CheckOTP(data) {
+		const QUERY = `CALL WEB_USER_CHECK_OTP_REGISTRATION(?,?,?)`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(
+				QUERY,
+				[data.user_id, data.otp, data.password],
+				(err, result) => {
+					if (err) {
+						reject(err);
+					}
+
+					resolve(result);
+				}
+			);
+		});
+	}
 };

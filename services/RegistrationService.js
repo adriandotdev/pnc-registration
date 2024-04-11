@@ -3,6 +3,7 @@ const SMS = require("../utils/SMS");
 const otpGenerator = require("otp-generator");
 const { v4: uuidv4 } = require("uuid");
 const Crypto = require("../utils/Crypto");
+const { HttpBadRequest } = require("../utils/HttpError");
 
 module.exports = class RegistrationService {
 	#repository;
@@ -37,10 +38,9 @@ module.exports = class RegistrationService {
 		const result = await this.#repository.Register(payload);
 
 		const STATUS = result[0][0].STATUS;
+		const user_id = result[0][0].user_id;
 
 		if (STATUS !== "SUCCESS") throw new HttpBadRequest(STATUS, []);
-
-		console.log(data.contact_number, data.message);
 
 		const sms = new SMS({
 			contact_number: data.contact_number,
@@ -49,6 +49,32 @@ module.exports = class RegistrationService {
 
 		await sms.SendOTP();
 
-		return STATUS;
+		return { STATUS, user_id };
+	}
+
+	async CheckOTP(data) {
+		const password = otpGenerator.generate(8, {
+			upperCaseAlphabets: false,
+			specialChars: false,
+			lowerCaseAlphabets: true,
+			digits: true,
+		});
+
+		const result = await this.#repository.CheckOTP({ ...data, password });
+
+		const status = result[0][0].STATUS;
+
+		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
+
+		const mobile_number = Crypto.Decrypt(result[0][0].mobile_number);
+
+		const sms = new SMS({
+			contact_number: mobile_number,
+			message: `Your temporary password is ${password}`,
+		});
+
+		await sms.SendOTP();
+
+		return status;
 	}
 };

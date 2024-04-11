@@ -123,4 +123,51 @@ module.exports = (app) => {
 			}
 		}
 	);
+
+	app.post(
+		"/registration/api/v1/otp/check",
+		[tokenMiddleware.BasicTokenVerifier()],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				const { user_id, otp } = req.body;
+
+				logger.info({
+					CHECK_OTP_REQUEST: {
+						user_id,
+						otp,
+					},
+				});
+
+				const result = await service.CheckOTP({ otp, user_id });
+
+				logger.info({
+					CHECK_OTP_RESPONSE: {
+						result,
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					CHECK_OTP_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
 };
