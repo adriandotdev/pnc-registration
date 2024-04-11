@@ -13,6 +13,7 @@ const {
 	RoleManagementMiddleware,
 } = require("../middlewares/RoleManagementMiddleware");
 
+const { HttpUnprocessableEntity } = require("../utils/HttpError");
 /**
  * @param {import('express').Express} app
  */
@@ -126,7 +127,19 @@ module.exports = (app) => {
 
 	app.post(
 		"/registration/api/v1/otp/check",
-		[tokenMiddleware.BasicTokenVerifier()],
+		[
+			tokenMiddleware.BasicTokenVerifier(),
+			body("user_id")
+				.notEmpty()
+				.withMessage("Missing required property: user_id")
+				.escape()
+				.trim(),
+			body("otp")
+				.notEmpty()
+				.withMessage("Missing required property: otp")
+				.escape()
+				.trim(),
+		],
 
 		/**
 		 * @param {import('express').Request} req
@@ -142,6 +155,8 @@ module.exports = (app) => {
 						otp,
 					},
 				});
+
+				validate(req, res);
 
 				const result = await service.CheckOTP({ otp, user_id });
 
