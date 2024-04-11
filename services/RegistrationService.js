@@ -42,9 +42,9 @@ module.exports = class RegistrationService {
 
 		if (STATUS !== "SUCCESS") throw new HttpBadRequest(STATUS, []);
 
-		const message = `Hello ${
+		const message = `Hello, ${
 			data.first_name + " " + data.last_name
-		},\n\nYour OTP for ParkNcharge is ${otp}.\n\nUse it to authenticate. If you didn't request this, ignore it.\n\nThanks,\nParkNcharge`;
+		}\n\nYour OTP for ParkNcharge is ${otp}.\n\nUse it to authenticate. If you didn't request this, ignore it.\n\nThanks,\nParkNcharge`;
 
 		const sms = new SMS({
 			contact_number: data.contact_number,
@@ -74,6 +74,35 @@ module.exports = class RegistrationService {
 		const name = Crypto.Decrypt(result[0][0].name);
 
 		const message = `Hi, ${name}\nYour temporary password is: ${password}.\n\nUse it to log in securely. If you didn't request this, please ignore.\n\nThanks,\nParkNcharge`;
+
+		const sms = new SMS({
+			contact_number: mobile_number,
+			message,
+		});
+
+		await sms.SendOTP();
+
+		return status;
+	}
+
+	async ResendOTP(data) {
+		const otp = otpGenerator.generate(6, {
+			upperCaseAlphabets: false,
+			specialChars: false,
+			lowerCaseAlphabets: false,
+			digits: true,
+		});
+
+		const result = await this.#repository.ResendOTP({ ...data, otp });
+
+		const status = result[0][0].STATUS;
+
+		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
+
+		const mobile_number = Crypto.Decrypt(result[0][0].mobile_number);
+		const name = Crypto.Decrypt(result[0][0].name);
+
+		const message = `Hello, ${name}\n\nYour OTP for ParkNcharge is ${otp}.\n\nUse it to authenticate. If you didn't request this, ignore it.\n\nThanks,\nParkNcharge`;
 
 		const sms = new SMS({
 			contact_number: mobile_number,

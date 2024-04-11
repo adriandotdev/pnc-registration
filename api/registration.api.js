@@ -170,4 +170,50 @@ module.exports = (app) => {
 			}
 		}
 	);
+
+	app.post(
+		"/registration/api/v1/otp/resend/:user_id",
+		[tokenMiddleware.BasicTokenVerifier()],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				const { user_id } = req.params;
+
+				logger.info({
+					RESEND_OTP_REQUEST: {
+						user_id,
+					},
+				});
+
+				const result = await service.ResendOTP({ user_id: req.params.user_id });
+
+				logger.info({
+					RESEND_OTP_RESPONSE: {
+						result,
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					RESEND_OTP_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
 };

@@ -47,4 +47,18 @@ module.exports = class RegistrationRepository {
 			);
 		});
 	}
+
+	ResendOTP(data) {
+		const QUERY = `CALL WEB_USER_RESEND_REGISTRATION_OTP(?,?)`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [data.user_id, data.otp], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };
