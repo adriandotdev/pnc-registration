@@ -13,6 +13,7 @@ module.exports = class RegistrationService {
 	}
 
 	async Register(data) {
+		// Generate 6-digit OTP
 		const otp = otpGenerator.generate(6, {
 			upperCaseAlphabets: false,
 			specialChars: false,
@@ -20,8 +21,10 @@ module.exports = class RegistrationService {
 			digits: true,
 		});
 
+		// Generate RFID
 		const rfid = uuidv4().replace(/-/g, "").substring(0, 12).toUpperCase();
 
+		// Encrypt necessary data
 		const payload = {
 			full_name: Crypto.Encrypt(data.first_name + " " + data.last_name),
 			address: Crypto.Encrypt(data.address),
@@ -46,6 +49,7 @@ module.exports = class RegistrationService {
 			data.first_name + " " + data.last_name
 		}\n\nYour OTP for ParkNcharge is ${otp}.\n\nUse it to authenticate. If you didn't request this, ignore it.\n\nThanks,\nParkNcharge`;
 
+		// Send SMS
 		const sms = new SMS({
 			contact_number: data.contact_number,
 			message,
@@ -57,6 +61,7 @@ module.exports = class RegistrationService {
 	}
 
 	async CheckOTP(data) {
+		// Generate 8-digit OTP
 		const password = otpGenerator.generate(8, {
 			upperCaseAlphabets: false,
 			specialChars: false,
