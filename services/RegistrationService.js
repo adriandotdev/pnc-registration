@@ -57,7 +57,7 @@ module.exports = class RegistrationService {
 
 		await sms.SendOTP();
 
-		return { STATUS, user_id };
+		return { STATUS, user_id, otp };
 	}
 
 	async CheckOTP(data) {
