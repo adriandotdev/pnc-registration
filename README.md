@@ -1,110 +1,69 @@
-# Registration Service
+# Registration API Documentation
 
-## URL
+This document outlines the endpoints and usage of the Registration API.
 
-`https://services-parkncharge.sysnetph.com/registration`
+## Authentication
 
-## APIs
-
-### POST - `/api/v1/register`
-
-**Description**
-
-Register a new user driver
-
-**Request**
-
-```json
-{
-	"first_name": "Mikaela",
-	"last_name": "Fudolig",
-	"address": "TEST address 1",
-	"contact_number": "0935*******",
-	"email_address": "email@gmail.com",
-	"vehicle_plate_number": "8012332",
-	"vehicle_brand": "Honda",
-	"vehicle_model": "Civic",
-	"username": "httpdotjs23"
-}
-```
-
-**Response**
-
-```json
-{
-	"status": 200,
-	"data": {
-		"STATUS": "SUCCESS",
-		"user_id": 149
-	},
-	"message": "Success"
-}
-```
-
-> NOTE: You can use the `user_id` for verifying the OTP
-
-**Errors**
-
-- **USERNAME_DOES_EXISTS**
+All endpoints require authentication using Basic Token.
 
 ---
 
-### POST - `/api/v1/otp/check`
+## Endpoints
 
-**Description**
+### 1. Register API
 
-Checks if the OTP provided is match to the OTP stored in database.
-
-**Request**
-
-```json
-{
-	"otp": "392370",
-	"user_id": 150
-}
-```
-
-**Response**
-
-```json
-{
-	"status": 200,
-	"data": "SUCCESS",
-	"message": "Success"
-}
-```
-
-**Errors**
-
-- **INCORRECT_OTP**
-- **USER_ID_DOES_NOT_EXISTS**
-- **MAXIMUM_ATTEMPTS_HAS_BEEN_REACHED**
-- **OTP_DOES_NOT_EXISTS**
+- **URL:** `/registration/api/v1/register`
+- **Method:** POST
+- **Authentication:** Basic Token
+- **Request Body:**
+  - `first_name` - First name of the user
+  - `last_name` - Last name of the user
+  - `address` - Address of the user
+  - `contact_number` - Contact number of the user
+  - `email_address` - Email address of the user
+  - `vehicle_plate_number` - Vehicle plate number
+  - `vehicle_brand` - Vehicle brand
+  - `vehicle_model` - Vehicle model
+  - `username` - Username for registration
+- **Description:** Registers a new user.
+- **Response:**
+  - `status` - HTTP status code
+  - `data` - Result data
+  - `message` - Success message
 
 ---
 
-### POST - `/api/v1/otp/resend/:user_id`
+### 2. OTP Check API
 
-**Description**
+- **URL:** `/registration/api/v1/otp/check`
+- **Method:** POST
+- **Authentication:** Basic Token
+- **Request Body:**
+  - `user_id` - User ID
+  - `otp` - One-time password (OTP)
+- **Description:** Verifies the provided OTP.
+- **Response:**
+  - `status` - HTTP status code
+  - `data` - Result data
+  - `message` - Success message
 
-Sends new OTP to the user based on ID.
+---
 
-**Parameters**
+### 3. OTP Resend API
 
-- **user_id**
-  - ID of User
-  - Type: Number
+- **URL:** `/registration/api/v1/otp/resend/:user_id`
+- **Method:** POST
+- **Authentication:** Basic Token
+- **Parameters:**
+  - `:user_id` - User ID
+- **Description:** Resends the OTP to the user.
+- **Response:**
+  - `status` - HTTP status code
+  - `data` - Result data
+  - `message` - Success message
 
-**Response**
+---
 
-```json
-{
-	"status": 200,
-	"data": "SUCCESS",
-	"message": "Success"
-}
-```
+## Error Handling
 
-**Errors**
-
-- **USER_ID_DOES_NOT_EXISTS**
+All endpoints are equipped with error handling middleware. If an error occurs, it will be logged, and an appropriate error response will be sent.
