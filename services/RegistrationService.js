@@ -12,6 +12,26 @@ module.exports = class RegistrationService {
 		this.#repository = new RegistrationRepository();
 	}
 
+	/**
+	 * @function Register
+	 * Registers a user with the provided data.
+	 * Generates a 6-digit OTP and an RFID for the user.
+	 * Encrypts sensitive data before storing it in the database.
+	 * Sends an OTP via SMS to the user's contact number for authentication.
+	 *
+	 * @param {Object} data - User registration data.
+	 * @param {string} data.first_name - User's first name.
+	 * @param {string} data.last_name - User's last name.
+	 * @param {string} data.address - User's address.
+	 * @param {string} data.contact_number - User's contact number.
+	 * @param {string} data.email_address - User's email address.
+	 * @param {string} data.vehicle_plate_number - Vehicle's plate number.
+	 * @param {string} data.vehicle_brand - Vehicle's brand.
+	 * @param {string} data.vehicle_model - Vehicle's model.
+	 * @param {string} data.username - User's desired username.
+	 * @returns {Promise<Object>} Object containing registration status, user ID, and OTP.
+	 * @throws {HttpBadRequest} Throws HttpBadRequest if the registration process fails.
+	 */
 	async Register(data) {
 		// Generate 6-digit OTP
 		const otp = otpGenerator.generate(6, {
@@ -60,6 +80,17 @@ module.exports = class RegistrationService {
 		return { STATUS, user_id, otp };
 	}
 
+	/**
+	 * @function CheckOTP
+	 * Generates an 8-digit OTP, checks it against the provided data,
+	 * and sends the OTP via SMS for user authentication.
+	 *
+	 * @param {Object} data - Data for OTP verification.
+	 * @param {string} data.mobile_number - User's mobile number.
+	 * @param {string} data.name - User's name.
+	 * @returns {Promise<string>} Status of OTP verification.
+	 * @throws {HttpBadRequest} Throws HttpBadRequest if OTP verification fails.
+	 */
 	async CheckOTP(data) {
 		// Generate 8-digit OTP
 		const password = otpGenerator.generate(8, {
@@ -90,6 +121,17 @@ module.exports = class RegistrationService {
 		return status;
 	}
 
+	/**
+	 * @function ResendOTP
+	 * Generates a new 6-digit OTP, resends it via SMS for user authentication,
+	 * and updates the OTP in the database.
+	 *
+	 * @param {Object} data - Data for OTP resend.
+	 * @param {string} data.mobile_number - User's mobile number.
+	 * @param {string} data.name - User's name.
+	 * @returns {Promise<string>} Status of OTP resend.
+	 * @throws {HttpBadRequest} Throws HttpBadRequest if OTP resend fails.
+	 */
 	async ResendOTP(data) {
 		const otp = otpGenerator.generate(6, {
 			upperCaseAlphabets: false,
