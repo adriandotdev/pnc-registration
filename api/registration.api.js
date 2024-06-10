@@ -96,7 +96,10 @@ module.exports = (app) => {
 			try {
 				logger.info({
 					REGISTER_USER_DRIVER_REQUEST: {
-						...req.body,
+						data: {
+							...req.body,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -108,6 +111,7 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
+				req.error_name = "REGISTER_USER_DRIVER_ERROR";
 				next(err);
 			}
 		}
@@ -139,8 +143,11 @@ module.exports = (app) => {
 
 				logger.info({
 					CHECK_OTP_REQUEST: {
-						user_id,
-						otp,
+						data: {
+							user_id,
+							otp,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -158,6 +165,7 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
+				req.error_name = "CHECK_OTP_ERROR";
 				next(err);
 			}
 		}
@@ -177,7 +185,10 @@ module.exports = (app) => {
 
 				logger.info({
 					RESEND_OTP_REQUEST: {
-						user_id,
+						data: {
+							user_id,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -193,6 +204,7 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
+				req.error_name = "RESEND_OTP_ERROR";
 				next(err);
 			}
 		}
@@ -201,6 +213,7 @@ module.exports = (app) => {
 	app.use((err, req, res, next) => {
 		logger.error({
 			API_REQUEST_ERROR: {
+				error_name: req.error_name || "UNKNOWN_ERROR",
 				message: err.message,
 				stack: err.stack.replace(/\\/g, "/"), // Include stack trace for debugging
 				request: {
