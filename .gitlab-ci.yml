@@ -1,6 +1,6 @@
 variables:
-  IMAGE_NAME: sysnet2024/pnc_registration
-  CONTAINER_NAME: pnc_registration
+  IMAGE_NAME: parkncharge/parkncharge-registration
+  CONTAINER_NAME: parkncharge-registration
   ROOT_FOLDER_NAME: pnc
   PORT: 4013
 
@@ -25,12 +25,13 @@ build_image:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - echo "Logged in to Docker successfully"
+    - docker info
   script:
-    - docker build -t $IMAGE_NAME .
+    - docker build -t repo.sysnetph.com:5050/$IMAGE_NAME:latest .
     - echo "Build image successfully"
-    - docker push $IMAGE_NAME
+    - docker push repo.sysnetph.com:5050/$IMAGE_NAME:latest
     - echo "Pushed image successfully"
 
 deploy:
@@ -39,9 +40,9 @@ deploy:
     - chmod 400 $SSH_KEY
   script:
     - ssh -o StrictHostKeyChecking=no -i $SSH_KEY -T $HOST "
-      echo "$REGISTRY_PASSWORD" | docker login -u $REGISTRY_USER --password-stdin &&
+      echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin &&
       docker stop '$CONTAINER_NAME' || true &&
       docker rm '$CONTAINER_NAME' || true &&
       docker images | grep '$IMAGE_NAME' | awk '{print $3}' | xargs docker rmi -f || true &&
-      docker pull $IMAGE_NAME &&
-      docker run -d -p $PORT:$PORT --name $CONTAINER_NAME --mount type=bind,source=/data/logs,target=/var/www/$ROOT_FOLDER_NAME/logs --mount type=bind,source=/data/uploads,target=/var/www/$ROOT_FOLDER_NAME/public/images $IMAGE_NAME"
+      docker pull repo.sysnetph.com:5050/$IMAGE_NAME:latest &&
+      docker run -d -p $PORT:$PORT --name $CONTAINER_NAME --mount type=bind,source=/data/logs,target=/var/www/$ROOT_FOLDER_NAME/logs --mount type=bind,source=/data/uploads,target=/var/www/$ROOT_FOLDER_NAME/public/images repo.sysnetph.com:5050/$IMAGE_NAME"
